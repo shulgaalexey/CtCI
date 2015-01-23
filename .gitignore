@@ -1,0 +1,7 @@
+*.[Oo]bj
+*.bak
+*.log
+*.lib
+[Bb]in
+[Dd]ebug*/
+[Rr]elease*/
