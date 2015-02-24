@@ -2,6 +2,12 @@
 *.bak
 *.log
 *.lib
+*.swp
+*.cproject
+*.o
+*.so
+[Bb]uild*/
 [Bb]in
 [Dd]ebug*/
 [Rr]elease*/
+.settings/
