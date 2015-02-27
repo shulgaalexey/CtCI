@@ -1,5 +1,3 @@
-
-/*
 // 1.5 Inplement a method to perform basic string compression using the counts
 // of repeated characters. For example, the string aabcccccaaa would become a2b1c5a3.
 // If the "compressed" string would not vecome smaller than the original string,
@@ -52,4 +50,3 @@ int main() {
 
 	return 0;
 }
-*/

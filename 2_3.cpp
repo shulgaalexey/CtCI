@@ -1,4 +1,3 @@
-/*
 // 2.3 Implement an algorithm to delete a node in the middle of a singly linked list, given only access to that node.
 // EXAMPLE
 // Input: the node c from the linked list a->b->c->d->e
@@ -54,5 +53,4 @@ int main() {
 	trace(a);
 	release(a);
 	return 0;
-}	
-*/
+}

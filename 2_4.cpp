@@ -1,16 +1,17 @@
-
 // 2.4 Write a code to partition a linked list around a value x, such that all nodes less than x,
 // come before all nodes grater than or equal to x.
 
 #include <iostream>
+#include <stdlib.h>
+#include <time.h>
+
 using namespace std;
 
 class node {
 public:
 	int value;
 	node *next;
-	node(int v) :
-			value(v), next(NULL) {
+	node(int v) : value(v), next(NULL) {
 	}
 };
 
@@ -22,6 +23,15 @@ void trace(node *l) {
 		cnt--;
 	}
 	cout << endl;
+}
+
+node *append(node *l, int v) {
+	if(!l) return new node(v);
+
+	node *head = l;
+	while(head->next) head = head->next;
+	head->next = new node(v);
+	return l;
 }
 
 node *copy(node *l) {
@@ -199,6 +209,7 @@ node *partition_smart(node *list, int pivot) {
 		}
 		head = head->next;
 	}
+	if(!greater) return less;
 	greater->next = NULL; // Finalize the list
 	// Concatenate: less->greater
 	if (!less)
@@ -206,6 +217,71 @@ node *partition_smart(node *list, int pivot) {
 	less->next = greater_head;
 	return less_head;
 }
+
+node *partition_book(node *l, const int x) {
+	if(!l) return NULL;
+	node *ptr = l;
+	node *head = l;
+	while(head->next) head = head->next;
+	node *tail = head;
+	const node *tail_ptr = tail;
+	head = l;
+	node *prev_ptr = l;
+	while(ptr) {
+		if(ptr == tail_ptr) break; // Finish: all nodes are processed
+		if(ptr->value < x) {
+			// Insert before head
+				if(ptr!=head) {
+					prev_ptr->next = ptr->next;
+					ptr->next = head;
+					head = ptr;
+					ptr = prev_ptr->next;
+				} else {
+					prev_ptr = ptr;
+					ptr = ptr->next;
+				}
+			//trace(head);
+		} else {
+			// Append after tail
+			if(ptr!=tail) {
+				if(ptr == prev_ptr) {
+					head = head->next;
+				    prev_ptr = head;
+					ptr->next = NULL;
+					tail->next = ptr;
+					tail = tail->next;
+					ptr = prev_ptr;
+				} else {
+					prev_ptr->next = ptr->next;
+					ptr->next = NULL;
+					tail->next = ptr;
+					tail = tail->next;
+					ptr = prev_ptr->next;
+				}
+			}
+			//trace(head);
+		   }
+	}
+	return head;
+}
+
+bool test(node *l, const int x) {
+	bool b = false;
+	while(l) {
+		if(l->value >= x) b = true;
+		if(b && (l->value < x)) return false;
+		l = l->next;
+	}
+	return true;
+}
+
+node *gen_random_list(const int length) {
+	node *l = NULL;
+	for(int i = 0; i < length; i ++ )
+		l = append(l, rand() % length);
+	return l;
+}
+
 
 int main() {
 	{
@@ -221,14 +297,17 @@ int main() {
 
 		node *l1 = copy(l);
 		node *l2 = copy(l);
+		node *l3 = copy(l);
 
 		node *r = partition_inplace(l, pivot);
 		node *r1 = partition_stupid(l1, pivot);
 		node *r2 = partition_smart(l2, pivot);
+		node *r3 = partition_book(l3, pivot);
 
 		trace(r);
 		trace(r1);
 		trace(r2);
+		trace(r3);
 
 		if (!equal(r, r1))
 			cout << "PROBLEM1" << endl;
@@ -236,10 +315,82 @@ int main() {
 			cout << "PROBLEM2" << endl;
 		if (!equal(r1, r2))
 			cout << "PROBLEM3" << endl;
+		if(!test(r3, pivot))
+			cout << "PROBLEM!" << endl;
 
 		release(l);
 		release(l1);
 		release(l2);
+		release(l3);
+	}
+
+	{ // Main test #0
+		int a[] = {1, 2, 2};
+		node *l = NULL;
+		for(size_t i = 0; i < (sizeof(a)/sizeof(a[0])); i ++ ) l = append(l, a[i]);
+		//trace(l);
+		l = partition_book(l, 1);
+		//trace(l);
+		if(!test(l,1)) cout << "PROBLEM!" << endl;
+		release(l);
+	}
+
+	{ // Main test #1
+		int a[] = {7, 8, 3, 5, 1, 10};
+		node *l = NULL;
+		for(size_t i = 0; i < (sizeof(a)/sizeof(a[0])); i ++ ) l = append(l, a[i]);
+		//trace(l);
+		l = partition_book(l, 5);
+		//trace(l);
+		if(!test(l,5)) cout << "PROBLEM!" << endl;
+		release(l);
+	}
+
+	{ // Massive tests with random values
+		srand(time(NULL));
+		for(int length = 2; length < 100; length ++) {
+			cout << "length: " << length << endl;
+			for(int testno = 0; testno < (length * 3); testno ++) {
+
+				node *l = gen_random_list(length);
+
+				node *l1 = copy(l);
+				node *l2 = copy(l);
+				node *l3 = copy(l);
+				node *l4 = copy(l);
+
+				const int pivot = rand() % length;
+				//cout << "Test: " << testno << ", x:" << pivot << ", list:" << endl;
+				//trace(l);
+
+				node *r1 = partition_inplace(l1, pivot);
+				node *r2 = partition_stupid(l2, pivot);
+				node *r3 = partition_smart(l2, pivot);
+				node *r4 = partition_book(l4, pivot);
+
+				bool b1 = test(r1, pivot);
+				bool b2 = test(r2, pivot);
+				bool b3 = test(r3, pivot);
+				bool b4 = test(r4, pivot);
+
+				if(!b1 || !b2 || !b3 || !b4) {
+					cout << "PROBLEM in" << endl;
+					if(!b1) cout << "\tinplace" << endl;
+					if(!b2) cout << "\tstupid" << endl;
+					if(!b3) cout << "\tsmart" << endl;
+					if(!b4) cout << "\tbook" << endl;
+
+					cout << "Test: " << testno << ", x:" << pivot << ", list:" << endl;
+					trace(l);
+				}
+
+				release(l);
+				release(l1);
+				release(l2);
+				release(l3);
+				release(l4);
+			}
+		}
 	}
 
 	return 0;
