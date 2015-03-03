@@ -265,6 +265,34 @@ node *partition_book(node *l, const int x) {
 	return head;
 }
 
+node *append_item(node *tail, node *item) {
+	item->next = NULL;
+	if(tail) tail->next = item;
+	return item;
+}
+
+node *prepend_item(node *l, node *item) {
+	item->next = l;
+	return item;
+}
+
+node *partition_book2(node *l, const int x) {
+	if(!l) return NULL;
+	node *head = l;
+	l = l->next;
+	head->next = NULL;
+	node *tail = head;
+	while(l) {
+		node *next = l->next;
+		if(l->value < x)
+			head = prepend_item(head, l);
+		else
+			tail = append_item(tail, l);
+		l = next;
+	}
+	return head;
+}
+
 bool test(node *l, const int x) {
 	bool b = false;
 	while(l) {
@@ -298,16 +326,19 @@ int main() {
 		node *l1 = copy(l);
 		node *l2 = copy(l);
 		node *l3 = copy(l);
+		node *l4 = copy(l);
 
 		node *r = partition_inplace(l, pivot);
 		node *r1 = partition_stupid(l1, pivot);
 		node *r2 = partition_smart(l2, pivot);
 		node *r3 = partition_book(l3, pivot);
+		node *r4 = partition_book2(l4, pivot);
 
 		trace(r);
 		trace(r1);
 		trace(r2);
 		trace(r3);
+		trace(r4);
 
 		if (!equal(r, r1))
 			cout << "PROBLEM1" << endl;
@@ -317,11 +348,14 @@ int main() {
 			cout << "PROBLEM3" << endl;
 		if(!test(r3, pivot))
 			cout << "PROBLEM!" << endl;
+		if(!test(r4, pivot))
+			cout << "PROBLEM!" << endl;
 
 		release(l);
 		release(l1);
 		release(l2);
 		release(l3);
+		release(l4);
 	}
 
 	{ // Main test #0
@@ -358,6 +392,7 @@ int main() {
 				node *l2 = copy(l);
 				node *l3 = copy(l);
 				node *l4 = copy(l);
+				node *l5 = copy(l);
 
 				const int pivot = rand() % length;
 				//cout << "Test: " << testno << ", x:" << pivot << ", list:" << endl;
@@ -367,18 +402,21 @@ int main() {
 				node *r2 = partition_stupid(l2, pivot);
 				node *r3 = partition_smart(l2, pivot);
 				node *r4 = partition_book(l4, pivot);
+				node *r5 = partition_book2(l5, pivot);
 
 				bool b1 = test(r1, pivot);
 				bool b2 = test(r2, pivot);
 				bool b3 = test(r3, pivot);
 				bool b4 = test(r4, pivot);
+				bool b5 = test(r5, pivot);
 
-				if(!b1 || !b2 || !b3 || !b4) {
+				if(!b1 || !b2 || !b3 || !b4 || !b5) {
 					cout << "PROBLEM in" << endl;
 					if(!b1) cout << "\tinplace" << endl;
 					if(!b2) cout << "\tstupid" << endl;
 					if(!b3) cout << "\tsmart" << endl;
 					if(!b4) cout << "\tbook" << endl;
+					if(!b5) cout << "\tbook2" << endl;
 
 					cout << "Test: " << testno << ", x:" << pivot << ", list:" << endl;
 					trace(l);
@@ -389,6 +427,7 @@ int main() {
 				release(l2);
 				release(l3);
 				release(l4);
+				release(l5);
 			}
 		}
 	}
