@@ -38,6 +38,33 @@ node *detect_map(node *l) {
 	return NULL;
 }
 
+// 1. Find collision point of slow runner and fast runner
+// 2. Find the start of the loop by finding collision by moving from
+//  a. head of the list
+//  b. collision point
+node *detect_loop_book(node *l) {
+	if(!l) return NULL;
+
+	// 1. Find the collision of slow runner and fast runner
+	node *sp = l; // Slow runner
+	node *fp = l; // Fast runner
+	do {
+		sp = sp->next;
+		fp = fp->next;
+		if(!fp) break;
+		fp = fp->next;
+	} while(fp && (fp != sp));
+	if(!fp) return NULL; // There is no loop
+
+	// 2. Find the beginning of the loop
+	node *p = l;
+	while(p != sp) {
+		p = p->next;
+		sp = sp->next;
+	}
+	return p;
+}
+
 int main(void) {
 	node *A = new node('A');
 	node *B = new node('B');
@@ -55,8 +82,9 @@ int main(void) {
 		node *l = A;
 		node *n1 = detect_loop(l);
 		node *n2 = detect_map(l);
+		node *n3 = detect_loop_book(l);
 
-		if(n1 && (n1 == n2))
+		if(n1 && (n1 == n2) && (n1 == n3))
 			cout << n1->value << endl;
 		else
 			cout << "PROBLEM! Dif algorithms!" << endl;
@@ -72,7 +100,8 @@ int main(void) {
 		l = A;
 		node *n1 = detect_loop(l);
 		node *n2 = detect_map(l);
-		if(n1 || n2)
+		node *n3 = detect_loop_book(l);
+		if(n1 || n2 || n3)
 			cout << "PROBLEM! Negative test failed!" << endl;
 	}
 

@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <string>
+#include <stack>
 using namespace std;
 
 class  node {
@@ -176,6 +177,37 @@ bool is_palindrome_linear(node *l) {
 	return true;
 }
 
+// Using stack (as in the book) ---------------------------
+// 1. Puth the first part of the list in the stack
+// 2. Compare second part of the list with values from the stack
+bool is_palindrome_stack(node *l) {
+	if(!l) return true;
+
+	// 1. Put the first part of the list in stack
+	node *sp = l; // Slow runner
+	node *fp = l; // Fast runner
+	stack<char> s;
+	node *center = NULL;
+	while(fp) {
+		center = sp;
+		s.push(sp->value);
+		sp = sp->next;
+		fp = fp->next;
+		if(!fp) break;
+		fp = fp->next;
+		if(!fp) center = center->next;
+	}
+
+	// 2. Compare second part of the list with values in stack
+	while(center) {
+		const char c = s.top();
+		s.pop();
+		if(c != center->value) return false;
+		center = center->next;
+	}
+	return true;
+}
+
 // Tests --------------------------------------------------
 int main(void) {
 
@@ -189,7 +221,10 @@ int main(void) {
 		test_list l3("ABCBA");
 		const bool b3 = is_palindrome_linear(l3);
 
-		if(!b1 || !b2 || !b3) cout << "PROBLEM!" << endl;
+		test_list l4("ABCBA");
+		const bool b4 = is_palindrome_stack(l4);
+
+		if(!b1 || !b2 || !b3 || !b4) cout << "PROBLEM!" << endl;
 	}
 
 	{ // test1: OK
@@ -202,7 +237,10 @@ int main(void) {
 		test_list l3("ABBA");
 		const bool b3 = is_palindrome_linear(l3);
 
-		if(!b1 || !b2 || !b3) cout << "PROBLEM!" << endl;
+		test_list l4("ABBA");
+		const bool b4 = is_palindrome_stack(l4);
+
+		if(!b1 || !b2 || !b3 ||!b4) cout << "PROBLEM!" << endl;
 	}
 
 	{ // test1: FAIL
@@ -215,7 +253,10 @@ int main(void) {
 		test_list l3("ABCA");
 		const bool b3 = is_palindrome_linear(l3);
 
-		if(b1 || b2 || b3) cout << "PROBLEM!" << endl;
+		test_list l4("ABCA");
+		const bool b4 = is_palindrome_stack(l4);
+
+		if(b1 || b2 || b3 ||b4) cout << "PROBLEM!" << endl;
 	}
 
 	return 0;
