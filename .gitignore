@@ -6,6 +6,7 @@
 *.cproject
 *.o
 *.so
+*~
 [Bb]uild*/
 [Bb]in
 [Dd]ebug*/
