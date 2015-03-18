@@ -4,6 +4,7 @@
 *.lib
 *.swp
 *.cproject
+*.project
 *.o
 *.so
 *~
