@@ -107,45 +107,20 @@ node *create_tree_r(char *arr, const int N) {
 	return root;
 }
 
-// 3. Create a tree level by level
-// (using a queue of items from previous level while generating current level)
-node *create_tree_b(char *arr, const int N) {
-	if(N <= 0) return NULL;
-	int jump = 2;
-	int step = 0;
-	queue<node *> *level = NULL;
-	do {
-		int idx = max(0, step * 2 - 1);
-		queue<node *> *cur_level = new queue<node *>();
-		while(idx < N) {
-			node *n = new node(arr[idx]);
-			if(level) {
-				if(!level->empty()) {
-					n->left = level->front();
-					level->pop();
-				}
-				if(!level->empty()) {
-					n->right = level->front();
-					level->pop();
-				}
-			}
-			cur_level->push(n);
-			idx += jump;
-		}
-		if(level) {
-			if(!level->empty()) cout << "error" << endl;
-			delete level;
-		}
-		level = cur_level;
-		jump *= 2;
-		if(jump > N) break;
-		step ++;
-	} while(true);
-	node *root = level->front();
-	level->pop();
-	if(!level->empty()) cout << "error2" << endl;
-	delete level;
+
+// Book approach ------------------------------------------
+node *perform_bst(char *arr, int start, int finish) {
+	if((start > finish) || (start < 0)) return NULL;
+	const int size = finish - start + 1;
+	const int center = start + size / 2;
+	node *root = new node(arr[center]);
+	root->left = perform_bst(arr, start, center - 1);
+	root->right = perform_bst(arr, center + 1, finish);
 	return root;
+}
+
+node *create_tree_book(char *arr, const int N) {
+	return perform_bst(arr, 0, N - 1);
 }
 
 // Visualize the tree -------------------------------------
@@ -205,7 +180,8 @@ void trace(node *tree) {
 
 // Tests --------------------------------------------------
 int main(void) {
-	for(int testno = 3; testno < 16; testno ++) {
+	for(int testno = 3; testno < 32; testno ++) {
+		cout << "----------------------------" << endl << endl;
 		vector<char> v;
 		for(char i = 0; i< char(testno); i ++) v.push_back('a' + i);
 		char *data = v.data();
@@ -216,8 +192,8 @@ int main(void) {
 		node *tr = create_tree_r(data, testno);
 		trace(tr);
 
-		//node *tb = create_tree_b(data, testno);
-		//trace(tb);
+		node *tbook = create_tree_book(data, testno);
+		trace(tbook);
 	}
 
 	return 0;
