@@ -124,6 +124,7 @@ node *create_tree_book(char *arr, const int N) {
 }
 
 // Visualize the tree -------------------------------------
+// taken from the internet
 size_t get_height(node *tree) {
 	if(!tree) return 0;
 	return max(get_height(tree->left), get_height(tree->right)) + 1;
