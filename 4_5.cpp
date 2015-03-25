@@ -2,6 +2,7 @@
 #include <iostream>
 #include <vector>
 #include <queue>
+#include <climits>
 using namespace std;
 
 class node {
@@ -23,6 +24,7 @@ static void release_gc() {
 	for(size_t i = 0; i < gc.size(); i ++ ) delete gc[i];
 }
 
+// It is not a complete solution
 bool is_bst_dfs(node *tree) {
 	if(!tree) return true;
 	if(tree->left && (tree->left->value > tree->value)) return false;
@@ -30,6 +32,7 @@ bool is_bst_dfs(node *tree) {
 	return is_bst_dfs(tree->left) && is_bst_dfs(tree->right);
 }
 
+// It is not a complete solution
 bool is_bst_bfs(node *tree) {
 	if(!tree) return true;
 	queue<node *> q;
@@ -47,6 +50,24 @@ bool is_bst_bfs(node *tree) {
 		}
 	}
 	return true;
+}
+
+bool perform_is_bst_book(node *tree, int min, int max) {
+	if(!tree) return true;
+	if(tree->left) {
+		if(tree->left->value > tree->value) return false;
+		if((tree->left->value < min) || (tree->left->value > max)) return false;
+	}
+	if(tree->right) {
+		if(tree->right->value < tree->value) return false;
+		if((tree->right->value > max) || (tree->right->value < min)) return false;
+	}
+	return perform_is_bst_book(tree->left, min, tree->value)
+		&& perform_is_bst_book(tree->right, tree->value, max);
+}
+
+bool is_bst_book(node *tree) {
+	return perform_is_bst_book(tree, INT_MIN, INT_MAX);
 }
 
 int main(void) {
@@ -71,6 +92,7 @@ int main(void) {
 
 	if(!is_bst_dfs(n4)) cout << "PROBLEM!" << endl;
 	if(!is_bst_bfs(n4)) cout << "PROBLEM!" << endl;
+	if(!is_bst_book(n4)) cout << "PROBLEM!" << endl;
 
 	n4->right = n5;
 	n5->left = n6;
@@ -84,6 +106,7 @@ int main(void) {
 
 	if(is_bst_dfs(n4)) cout << "PROBLEM!" << endl;
 	if(is_bst_bfs(n4)) cout << "PROBLEM!" << endl;
+	if(is_bst_book(n4)) cout << "PROBLEM!" << endl;
 
 	release_gc();
 	return 0;
