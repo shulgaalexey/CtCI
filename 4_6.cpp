@@ -36,16 +36,18 @@ node *get_right(node *n, bool prev_left) {
 	if(prev_left) {
 		if(n->right) return n->right;
 		else return get_right(n->parent, n->is_left());
-	} else {
+	} else
 		return get_right(n->parent, n->is_left());
-	}
-
 }
 
 node *get_next(node *n) {
 	if(!n) return NULL;
-	if(n->left) return n->left;
-	return get_right(n->parent, n->is_left());
+	if(n->right) {
+		n = n->right;
+		while(n && n->left) n = n->left;
+		return n;
+	} else
+		return get_right(n->parent, n->is_left());
 }
 
 int main(void) {
@@ -60,8 +62,14 @@ int main(void) {
 	//
 	n[1]->set_children(n[0], n[2]);
 	bool ok = get_next(n[0]) == n[2];
-	ok &= get_next(n[1]) == n[0];
+	node *t = get_next(n[0]);
+
+	ok &= get_next(n[1]) == n[2];
+	t =   get_next(n[1]);
+
 	ok &= get_next(n[2]) == NULL;
+	t =   get_next(n[2]);
+
 
 	// b ----------------------------------------------
 	//
@@ -71,7 +79,14 @@ int main(void) {
 	//
 	n[3]->set_children(n[1], n[4]);
 	ok &= get_next(n[0]) == n[2];
+	t =   get_next(n[0]);
+
 	ok &= get_next(n[2]) == n[4];
+	t =   get_next(n[2]);
+
+	ok &= get_next(n[1]) == n[2];
+	t =   get_next(n[1]);
+
 
 	// c ----------------------------------------------
 	//
@@ -83,7 +98,11 @@ int main(void) {
 	n[3]->set_children(n[1], NULL);
 	n[4]->set_children(n[3], n[5]);
 	ok &= get_next(n[0]) == n[2];
+	t =   get_next(n[0]);
+
 	ok &= get_next(n[2]) == n[5];
+	t =   get_next(n[2]);
+
 
 	// d ----------------------------------------------
 	//
@@ -100,17 +119,43 @@ int main(void) {
 	n[8]->set_children(n[7], n[9]);
 
 	ok &= get_next(n[0]) == n[2];
-	ok &= get_next(n[1]) == n[0];
+	t =   get_next(n[0]);
+
+	ok &= get_next(n[1]) == n[2];
+	t =   get_next(n[1]);
+
 	ok &= get_next(n[2]) == n[5];
-	ok &= get_next(n[3]) == n[1];
+	t =   get_next(n[2]);
+
+	ok &= get_next(n[3]) == n[4];
+	t =   get_next(n[3]);
+
 	ok &= get_next(n[4]) == n[10];
-	ok &= get_next(n[5]) == n[4];
-	ok &= get_next(n[6]) == n[3];
+	t =   get_next(n[4]);
+
+	ok &= get_next(n[5]) == n[10];
+	t =   get_next(n[5]);
+
+	ok &= get_next(n[6]) == n[7];
+	t =   get_next(n[6]);
+
 	ok &= get_next(n[7]) == n[9];
-	ok &= get_next(n[8]) == n[7];
+	t =   get_next(n[7]);
+
+	ok &= get_next(n[8]) == n[9];
+	t =   get_next(n[8]);
+
 	ok &= get_next(n[9]) == n[11]; // !!
-	ok &= get_next(n[10]) == n[8];
+	t =   get_next(n[9]);
+
+	ok &= get_next(n[10]) == n[11];
+	t =   get_next(n[10]);
+
 	ok &= get_next(n[11]) == NULL;
+	t =   get_next(n[11]);
+
+	if(t) {}
+
 
 	if(!ok) cout << "PROBLEM!" << endl;
 	for(int i = 0; i < N; i ++) delete n[i];
