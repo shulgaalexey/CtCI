@@ -109,6 +109,11 @@ int main(void) {
 	anc = find_ancestor(tree, n('j'), n('j'));
 	ok = anc == n('e');
 
+	node *fake_node = new node('o');
+	anc = find_ancestor(tree, n('j'), fake_node);
+	ok = anc == NULL;
+	delete fake_node;
+
 	if(!ok) cout << "PROBLEM!" << endl;
 
 	release_nodes();
