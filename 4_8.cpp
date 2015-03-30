@@ -15,6 +15,12 @@ using namespace std;
 
 vector<class node *> gc;
 
+static char first_v = 60;//33;
+
+void reset_labels() {
+	first_v = 60;//33;
+}
+
 class node {
 	public:
 		char value;
@@ -22,9 +28,8 @@ class node {
 		node *right;
 	public:
 		node() : value(0), left(NULL), right(NULL) {
-			static int first_v = 60;//33;
 			value = first_v ++;
-			if(first_v > 126) first_v = 33;
+			if(first_v > 126) reset_labels();
 			gc.push_back(this);
 		}
 		node(int v) : value(v), left(NULL), right(NULL) {
@@ -34,6 +39,7 @@ class node {
 
 void release_gc() {
 	for(size_t i = 0; i < gc.size(); i ++) delete gc[i];
+	gc.clear();
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -148,7 +154,7 @@ class krrh {
 		void skip(char c) {
 			//cur_size --;
 			if(cur_size < 0) throw out_of_range("krrh::skip negative size");
-			size_t sub = size_t(pow(1. * a, 1. * N-1));
+			size_t sub = size_t(round(pow(1. * a, 1. * N-1)));
 			hash = (hash - (sub % p) * (unsigned char)c) % p;
 		}
 		bool full() const { return (size_t(cur_size) == N); }
@@ -184,6 +190,14 @@ bool perform_is_subtree_krrh(node *tree, long long hash, const string &str, krrh
 		const char c = hash_obj.get_first();
 		hash_obj.append(tree->value);
 		hash_obj.skip(c);
+	}
+
+	if(hash_obj.full()) {
+		if(hash_obj.get_str() == str) cout << endl;
+		cout << hash_obj.get_str() << "\t" << str << "\t" << hash_obj.get_hash() << "\t" << hash << endl;
+		if(hash_obj.get_str() == str) {
+			cout << get_string_hash(hash_obj.get_str()) << endl << endl;
+		}
 	}
 	//if(hash_obj.full() && (hash_obj.get_hash() == hash) && (hash_obj.get_str() == str)) return true;
 	if(hash_obj.full())
@@ -264,12 +278,50 @@ void print_tree(node *root) {
 
 
 int main(void) {
+/*	{
+		node *tree = gen_tree(new node(), 3);
+		print_tree(tree);
+		print_tree(gc[9]);
+		if(!is_subtree_krrh(tree, gc[9])) cout << "PROBLEM!" << endl;
+		release_gc();
+	}
 
-	node *tree = gen_tree(new node(), 3);
-	print_tree(tree);
-	print_tree(gc[9]);
-	if(!is_subtree_krrh(tree, gc[9])) cout << "PROBLEM!" << endl;
-	release_gc();
+	{
+		node *tree = gen_tree(new node(), 5);
+		print_tree(tree);
+		print_tree(gc[5]);
+		if(!is_subtree_krrh(tree, gc[9])) cout << "PROBLEM!" << endl;
+		release_gc();
+	}
+*/
+	{
+		reset_labels();
+
+		node *tree = gen_tree(new node(), 5);
+		print_tree(tree);
+
+		node *B = new node('B');
+		node *I = new node('I');
+		node *J = new node('J');
+		node *K = new node('K');
+		node *L = new node('L');
+		node *M = new node('M');
+		node *N = new node('N');
+
+		B->left = I;
+		B->right = J;
+		I->left = K;
+		I->right = L;
+		J->left = M;
+		J->right = N;
+
+		print_tree(B);
+
+		if(!is_subtree_krrh(tree, B)) cout << "PROBLEM!" << endl;
+		release_gc();
+	}
+
+
 	return 0;
 
 /*
