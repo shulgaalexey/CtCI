@@ -2,8 +2,6 @@
 //
 //
 #include <iostream>
-#include <math.h> // for trace
-#include <algorithm>
 #include <stdexcept>
 
 using namespace std;
@@ -63,7 +61,6 @@ class circular_buffer {
 			buf[cur_pos] = c;
 			cur_pos = (cur_pos + 1) % N;
 		}
-		// this is useless actually
 		string get_buffer() const {
 			string str;
 			// may be optimized obviously
@@ -78,9 +75,9 @@ class circular_buffer {
 // http://ocw.mit.edu/courses/electrical-engineering-and-computer-science/6-006-introduction-to-algorithms-fall-2011/lecture-videos/MIT6_006F11_lec09.pdf
 class krrh {
 	private:
-		const size_t a;	// alphabet size, 255
-		const size_t p;	// prime number, bigger than window size
-		const size_t N;	// Window size (size of the smaller tree in the task)
+		const size_t a;	// alphabet size
+		const size_t p;	// prime number
+		const size_t N;	// Window size
 		size_t first_base;	// Multiplier of the first digit in the cache
 
 		unsigned long long hash;
@@ -89,9 +86,7 @@ class krrh {
 
 	public:
 		krrh(const size_t size)
-			: a(101) // enough for english alphabet
-			  //, p( 72057594037927931ULL)
-			  //, p(prime_gen::greater_than(10000))
+			: a(101)
 			  , p(prime_gen::greater_than(1ULL<<40))
 			  , N(size)
 			  , first_base(0)
@@ -108,18 +103,11 @@ class krrh {
 
 	public:
 		void append(char c) {
-			if(full()) {
-				// remove first
-				unsigned long long fb = 1;
-				for(size_t i = 0; i < (N - 1); i ++) fb *= a;
-				fb %= p;
-				const unsigned long long first = (first_base * get_first()) % p;
-				hash = p + hash - first;
-			}
-
+			if(full())
+				hash = p + hash - (first_base * get_first()) % p;
+			hash = (hash * a + c) % p;
 			str.append(c);
 			cur_size = min(cur_size + 1, int(N));
-			hash = (hash * a + c) % p;
 		}
 		bool full() const { return (size_t(cur_size) == N); }
 		long long get_hash() const {

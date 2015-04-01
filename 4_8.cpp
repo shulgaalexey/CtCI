@@ -15,10 +15,10 @@ using namespace std;
 
 vector<class node *> gc;
 
-static char first_v = 'A';//60;//33;
+static char first_v = 'A';
 
 void reset_labels() {
-	first_v = 'A';//60;//33;
+	first_v = 'A';
 }
 
 class node {
@@ -29,7 +29,7 @@ class node {
 	public:
 		node() : value(0), left(NULL), right(NULL) {
 			value = first_v ++;
-			if(first_v > 'Z'/*126*/) reset_labels();
+			if(first_v > 'Z') reset_labels();
 			gc.push_back(this);
 		}
 		node(int v) : value(v), left(NULL), right(NULL) {
@@ -45,13 +45,16 @@ void release_gc() {
 /////////////////////////////////////////////////////////////////////////////
 // DFS approach
 bool perform_is_subtree_dfs(node *T1, node *T2) {
-	if(!T2) return true;
-	if(!T1) return true;
+	if(!T1 && !T2) return true; // Both trees are finished simultaneously: OK
+	if(!T2) return false;
+	if(!T1) return false;
+
 	if(T1->value != T2->value) return false;
 	return perform_is_subtree_dfs(T1->left, T2->left) && perform_is_subtree_dfs(T1->right, T2->right);
 }
 
 bool is_subtree_dfs(node *T1, node *T2) {
+	if(!T1 && !T2) return true;
 	if(!T1 || !T2) return false;
 	if(T1->value == T2->value) {
 		if(perform_is_subtree_dfs(T1, T2)) return true;
@@ -76,7 +79,7 @@ bool is_subtree_strings(node *T1, node *T2) {
 
 	int limit = int(S1.length()) - int(S2.length());
 	limit = max(0, limit);
-	for(size_t i = 0; i < size_t(limit); i ++) {
+	for(size_t i = 0; i <= size_t(limit); i ++) {
 		bool dif = false;
 		for(size_t j = 0; j < S2.length(); j ++) {
 			size_t idx = j + i;
@@ -152,7 +155,6 @@ class circular_buffer {
 			buf[cur_pos] = c;
 			cur_pos = (cur_pos + 1) % N;
 		}
-		// this is useless actually
 		string get_buffer() const {
 			string str;
 			// may be optimized obviously
@@ -163,46 +165,42 @@ class circular_buffer {
 		char get_first() const { return buf[cur_pos]; }
 };
 
-// Karp-Rabin Rolling Hash is a cache of a floating window
-// http://ocw.mit.edu/courses/electrical-engineering-and-computer-science/6-006-introduction-to-algorithms-fall-2011/lecture-videos/MIT6_006F11_lec09.pdf
+
 class krrh {
 	private:
-		const size_t a;	// alphabet size, 255
-		const size_t p;	// prime number, bigger than window size
+		const size_t a;	// alphabet size
+		const size_t p;	// prime number
 		const size_t N;	// Window size (size of the smaller tree in the task)
+		size_t first_base;	// Multiplier of the first digit in the cache
 
 		unsigned long long hash;
 		int cur_size;
 		circular_buffer str;
 
 	public:
-		//krrh(const size_t size, const size_t max_size = 10000000)	// T2 is supposed to have 10M nodes
-		krrh(const size_t size, const size_t max_size = 101)	// T2 is supposed to have 10M nodes
-			  //: a(1<<5) // enough for english alphabet
-			  : a(100) // enough for english alphabet
-			  //, p(prime_gen::greater_than(max(size, max_size)))
-			  , p( 72057594037927931ULL)
+		krrh(const size_t size)
+			: a(101)
+			  , p(prime_gen::greater_than(1ULL<<40))
 			  , N(size)
-		      , hash(0)
+			  , first_base(0)
+			  , hash(0)
 			  , cur_size(0)
-			  , str(size)
-	{}
+			  , str(size) {
+				  unsigned long long fb = 1;
+				  for(size_t i = 0; i < (N - 1); i ++) {
+					  fb *= a;
+					  if(fb > p) fb %= p;
+				  }
+				  first_base = fb;
+			  }
+
 	public:
 		void append(char c) {
+			if(full())
+				hash = p + hash - (first_base * get_first()) % p;
+			hash = (hash * a + c) % p;
 			str.append(c);
 			cur_size = min(cur_size + 1, int(N));
-			//hash = ((hash % p) * a + c) % p;
-			hash = ((hash * a) % p + c) % p;
-		}
-		void skip(char c) {
-			if(cur_size <= 0) throw out_of_range("krrh::skip negative size");
-
-			size_t first_exp = min(N, size_t(cur_size));
-			size_t first_base = 1;
-			for(size_t i = 0; i < (first_exp - 1); i ++)
-				first_base *= a;
-
-			hash = (hash % p - c * (first_base % p)) %p;
 		}
 		bool full() const { return (size_t(cur_size) == N); }
 		long long get_hash() const {
@@ -220,6 +218,7 @@ class krrh {
 		}
 };
 
+
 long long get_string_hash(const string &str) {
 	if(str.empty()) return 0;
 	krrh hash_obj(str.size());
@@ -231,24 +230,8 @@ bool perform_is_subtree_krrh(node *tree, long long hash, const string &str, krrh
 	if(!tree) return false;
 	if(perform_is_subtree_krrh(tree->left, hash, str, hash_obj)) return true;
 
-	//cout << "\t\t\t" << tree->value << endl;
+	hash_obj.append(tree->value);
 
-	if(!hash_obj.full()) {
-		hash_obj.append(tree->value);
-	} else {
-		const char c = hash_obj.get_first();
-		hash_obj.append(tree->value);
-		hash_obj.skip(c);
-	}
-
-	if(hash_obj.full()) {
-		if(hash_obj.get_str() == str) cout << endl;
-		cout << hash_obj.get_str() << "\t" << str << "\t" << hash_obj.get_hash() << "\t" << hash << endl;
-		if(hash_obj.get_str() == str) {
-			cout << get_string_hash(hash_obj.get_str()) << endl << endl;
-		}
-	}
-	//if(hash_obj.full() && (hash_obj.get_hash() == hash) && (hash_obj.get_str() == str)) return true;
 	if(hash_obj.full())
 		if(hash_obj.get_hash() == hash)
 			if(hash_obj.get_str() == str)
@@ -327,74 +310,13 @@ void print_tree(node *root) {
 
 
 int main(void) {
-	{ // Testing KRRH 1
-		krrh h1(4, 4*100*100*100*100);
-		h1.trace();
-		h1.append('A');
-		h1.trace();
-		h1.append('B');
-		h1.trace();
-		h1.append('C');
-		h1.trace();
-		h1.append('D');
-		h1.trace();
-
-		krrh h2(4, 4*100*100*100*100);
-		h2.trace();
-		h2.append('X');
-		h2.trace();
-		h2.append('A');
-		h2.trace();
-		h2.append('B');
-		h2.trace();
-		h2.append('C');
-		h2.trace();
-		h2.skip('X');
-		h2.trace();
-		h2.append('D');
-		h2.trace();
-
-		cout << h1.get_str() << ":" << h2.get_str() << "\t";
-		cout << h1.get_hash() << ":" << h2.get_hash() << endl;
-	}
-
-	{ // Testing KRRH 2
-		krrh h1(4);
-		h1.trace();
-		h1.append('A');
-		h1.trace();
-		h1.append('B');
-		h1.trace();
-		h1.append('C');
-		h1.trace();
-		h1.append('D');
-		h1.trace();
-
-		krrh h2(4);
-		h2.trace();
-		h2.append('X');
-		h2.trace();
-		h2.append('A');
-		h2.trace();
-		h2.append('B');
-		h2.trace();
-		h2.append('C');
-		h2.trace();
-		h2.skip('X');
-		h2.trace();
-		h2.append('D');
-		h2.trace();
-
-		cout << h1.get_str() << ":" << h2.get_str() << "\t";
-		cout << h1.get_hash() << ":" << h2.get_hash() << endl;
-	}
 
 	{ // Test 1 positive
 		reset_labels();
 
 		node *tree = gen_tree(new node(), 3);
-		print_tree(tree);
-		print_tree(gc[9]);
+		//print_tree(tree);
+		//print_tree(gc[9]);
 
 		if(!is_subtree_dfs(tree, gc[9])) cout << "PROBLEM!" << endl;
 		if(!is_subtree_strings(tree, gc[9])) cout << "PROBLEM!" << endl;
@@ -406,8 +328,8 @@ int main(void) {
 		reset_labels();
 
 		node *tree = gen_tree(new node(), 5);
-		print_tree(tree);
-		print_tree(gc[5]);
+		//print_tree(tree);
+		//print_tree(gc[5]);
 
 		if(!is_subtree_dfs(tree, gc[5])) cout << "PROBLEM!" << endl;
 		if(!is_subtree_strings(tree, gc[5])) cout << "PROBLEM!" << endl;
@@ -419,8 +341,8 @@ int main(void) {
 		reset_labels();
 
 		node *tree = gen_tree(new node(), 5);
-		print_tree(tree);
-		print_tree(gc[6]);
+		//print_tree(tree);
+		//print_tree(gc[6]);
 
 		if(!is_subtree_dfs(tree, gc[6])) cout << "PROBLEM!" << endl;
 		if(!is_subtree_strings(tree, gc[6])) cout << "PROBLEM!" << endl;
@@ -432,40 +354,208 @@ int main(void) {
 		reset_labels();
 
 		node *tree = gen_tree(new node(), 5);
-		print_tree(tree);
+		//print_tree(tree);
 
-		node *B = new node('B');
-		node *I = new node('I');
-		node *J = new node('J');
-		node *K = new node('K');
-		node *L = new node('L');
-		node *M = new node('M');
-		node *N = new node('N');
+		node *T = new node('T');
+		node *V = new node('V');
+		node *W = new node('W');
+		node *X = new node('X');
+		node *Y = new node('Y');
+		node *Z = new node('Z');
+		node *A = new node('A');
 
-		B->left = I;
-		B->right = J;
-		I->left = K;
-		I->right = L;
-		J->left = M;
-		J->right = N;
+		T->left = V;
+		T->right = W;
+		V->left = X;
+		V->right = Y;
+		W->left = Z;
+		W->right = A;
 
-		print_tree(B);
+		//print_tree(T);
 
-		if(!is_subtree_dfs(tree, B)) cout << "PROBLEM!" << endl;
-		if(!is_subtree_strings(tree, B)) cout << "PROBLEM!" << endl;
-		if(!is_subtree_krrh(tree, B)) cout << "PROBLEM!" << endl;
+		if(!is_subtree_dfs(tree, T)) cout << "PROBLEM!" << endl;
+		if(!is_subtree_strings(tree, T)) cout << "PROBLEM!" << endl;
+		if(!is_subtree_krrh(tree, T)) cout << "PROBLEM!" << endl;
+		release_gc();
+	}
+
+	{ // Test 5 positive
+		reset_labels();
+
+		node *tree = gen_tree(new node(), 5);
+		//print_tree(tree);
+
+		node *T = new node('T');
+		node *V = new node('V');
+		node *W = new node('W');
+		node *X = new node('X');
+		node *Y = new node('Y');
+		node *Z = new node('Z');
+
+		T->left = V;
+		T->right = W;
+		V->left = X;
+		V->right = Y;
+		W->left = Z;
+
+		//print_tree(T);
+
+		if(!is_subtree_dfs(tree, T)) cout << "PROBLEM!++++" << endl;
+		if(!is_subtree_strings(tree, T)) cout << "PROBLEM!" << endl;
+		if(!is_subtree_krrh(tree, T)) cout << "PROBLEM!" << endl;
 		release_gc();
 	}
 
 
+	{ // Test 6 positive
+		reset_labels();
 
-	{ // Test 5 negative
+		node *tree = gen_tree(new node(), 5);
+		//print_tree(tree);
+
+		node *Y = new node('Y');
+		node *F = new node('F');
+		node *G = new node('G');
+		node *H = new node('H');
+		node *I = new node('I');
+		node *J = new node('J');
+		node *K = new node('K');
+
+		Y->left = F;
+		Y->right = G;
+		F->left = H;
+		F->right = I;
+		G->left = J;
+		G->right = K;
+
+		//print_tree(Y);
+
+		if(!is_subtree_dfs(tree, Y)) cout << "PROBLEM!" << endl;
+		if(!is_subtree_strings(tree, Y)) cout << "PROBLEM!" << endl;
+		if(!is_subtree_krrh(tree, Y)) cout << "PROBLEM!" << endl;
+		release_gc();
+	}
+
+
+	{ // Test 7 negative
 		node *tree = gen_tree(new node(), 3);
 
 		if(is_subtree_dfs(tree, new node())) cout << "PROBLEM!" << endl;
 		if(is_subtree_strings(tree, new node())) cout << "PROBLEM!" << endl;
 		if(is_subtree_krrh(tree, new node())) cout << "PROBLEM!" << endl;
 
+		release_gc();
+	}
+
+
+	{ // Test 8 negative
+		reset_labels();
+
+		node *tree = gen_tree(new node(), 5);
+		//print_tree(tree);
+
+		node *Y = new node('Y');
+		node *F = new node('F');
+		node *G = new node('G');
+		node *H = new node('H');
+		node *I = new node('I');
+		node *J = new node('J');
+		node *K = new node('J');	// Wrong!!
+
+		Y->left = F;
+		Y->right = G;
+		F->left = H;
+		F->right = I;
+		G->left = J;
+		G->right = K;
+
+		//print_tree(Y);
+
+		if(is_subtree_dfs(tree, Y)) cout << "PROBLEM!" << endl;
+		if(is_subtree_strings(tree, Y)) cout << "PROBLEM!" << endl;
+		if(is_subtree_krrh(tree, Y)) cout << "PROBLEM!" << endl;
+		release_gc();
+	}
+
+
+	{ // Test 9 negative
+		reset_labels();
+
+		node *tree = gen_tree(new node(), 2);
+		//print_tree(tree);
+
+		node *C = new node('C');
+		node *F = new node('F');
+		node *G = new node('X');	// Wrong
+
+		C->left = F;
+		C->right = G;
+
+		//print_tree(C);
+
+		if(is_subtree_dfs(tree, C)) cout << "PROBLEM!" << endl;
+		if(is_subtree_strings(tree, C)) cout << "PROBLEM!" << endl;
+		if(is_subtree_krrh(tree, C)) cout << "PROBLEM!" << endl;
+		release_gc();
+	}
+
+
+	{ // Test 10 negative
+		reset_labels();
+
+		node *tree = gen_tree(new node(), 4);
+		//print_tree(tree);
+
+		node *S = new node('S');
+		node *Z = new node('Z');
+		node *A = new node('A');
+		node *B = new node('B');
+		node *C = new node('C');
+		node *D = new node('D');
+		node *E = new node('X');	// Wrong!!
+
+		S->left = Z;
+		S->right = A;
+		Z->left = B;
+		Z->right = C;
+		A->left = D;
+		A->right = E;
+
+		//print_tree(S);
+
+		if(is_subtree_dfs(tree, S)) cout << "PROBLEM!" << endl;
+		if(is_subtree_strings(tree, S)) cout << "PROBLEM!" << endl;
+		if(is_subtree_krrh(tree, S)) cout << "PROBLEM!" << endl;
+		release_gc();
+	}
+
+
+	{ // Test 11 positive
+		reset_labels();
+
+		node *tree = gen_tree(new node(), 4);
+		//print_tree(tree);
+
+		node *S = new node('S');
+		node *Z = new node('Z');
+		node *A = new node('A');
+		node *B = new node('B');
+		node *C = new node('C');
+		node *D = new node('D');
+		node *E = new node('E');
+
+		S->left = Z;
+		S->right = A;
+		Z->left = B;
+		Z->right = C;
+		A->left = D;
+		A->right = E;
+
+		//print_tree(S);
+
+		if(!is_subtree_dfs(tree, S)) cout << "PROBLEM!" << endl;
+		if(!is_subtree_strings(tree, S)) cout << "PROBLEM!" << endl;
+		if(!is_subtree_krrh(tree, S)) cout << "PROBLEM!" << endl;
 		release_gc();
 	}
 
