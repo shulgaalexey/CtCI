@@ -65,18 +65,50 @@ bool is_subtree_dfs(node *T1, node *T2) {
 }
 
 /////////////////////////////////////////////////////////////////////////////
-string tree2string(node *tree) {
+// Books approach, DFS
+bool is_subtree_dfs_book(node *r1, node *r2);
+
+bool match_tree_book(node *r1, node *r2);
+
+bool contains_tree_book(node *t1, node *t2) {
+	if(!t2) return true; // The empty tree is always a subtree
+	return is_subtree_dfs_book(t1, t2);
+}
+
+bool is_subtree_dfs_book(node *r1, node *r2) {
+	if(!r1) return false; // big tree empty & subtree still not found.
+	if(r1->value == r2->value)
+		if(match_tree_book(r1, r2)) return true;
+	return (is_subtree_dfs_book(r1->left, r2) || is_subtree_dfs_book(r1->right, r2));
+}
+
+bool match_tree_book(node *r1, node *r2) {
+	if(!r2 && !r1) // if both are empty
+		return true; // nothing left in the subtree
+
+	// if one, but not both, are empty
+	if(!r1 || !r2) return false;
+
+	if(r1->value != r2->value)
+		return false; // data doesn't match
+	return (match_tree_book(r1->left, r2->left) && match_tree_book(r1->right, r2->right));
+}
+
+/////////////////////////////////////////////////////////////////////////////
+string tree2string_preorder(node *tree) {
 	if(!tree) return "";
-	return tree2string(tree->left) + tree->value + tree2string(tree->right);
+	return string() + tree->value + tree2string_preorder(tree->left) + tree2string_preorder(tree->right);
+}
+
+string tree2string_inorder(node *tree) {
+	if(!tree) return "";
+	return tree2string_inorder(tree->left) + tree->value + tree2string_inorder(tree->right);
 }
 
 /////////////////////////////////////////////////////////////////////////////
 // Approach: Get two strings S1 and S2 by in-order traversal of T1 and T2
 // Find T2 as a substring of T1
-bool is_subtree_strings(node *T1, node *T2) {
-	const string S1 = tree2string(T1);
-	const string S2 = tree2string(T2);
-
+bool is_substring(const string &S1, const string &S2) {
 	int limit = int(S1.length()) - int(S2.length());
 	limit = max(0, limit);
 	for(size_t i = 0; i <= size_t(limit); i ++) {
@@ -92,6 +124,13 @@ bool is_subtree_strings(node *T1, node *T2) {
 		if(!dif) return true;
 	}
 	return false;
+
+}
+
+bool is_subtree_strings(node *T1, node *T2) {
+	return is_substring(tree2string_preorder(T1), tree2string_preorder(T2))
+		&& is_substring(tree2string_inorder(T1), tree2string_inorder(T2));
+
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -226,9 +265,8 @@ long long get_string_hash(const string &str) {
 	return hash_obj.get_hash();
 }
 
-bool perform_is_subtree_krrh(node *tree, long long hash, const string &str, krrh &hash_obj) {
+bool perform_is_subtree_krrh_preorder(node *tree, long long hash, const string &str, krrh &hash_obj) {
 	if(!tree) return false;
-	if(perform_is_subtree_krrh(tree->left, hash, str, hash_obj)) return true;
 
 	hash_obj.append(tree->value);
 
@@ -236,17 +274,42 @@ bool perform_is_subtree_krrh(node *tree, long long hash, const string &str, krrh
 		if(hash_obj.get_hash() == hash)
 			if(hash_obj.get_str() == str)
 				return true;
-	if(perform_is_subtree_krrh(tree->right, hash, str, hash_obj)) return true;
+
+	if(perform_is_subtree_krrh_preorder(tree->left, hash, str, hash_obj)) return true;
+	if(perform_is_subtree_krrh_preorder(tree->right, hash, str, hash_obj)) return true;
 	return false;
 }
 
-bool is_subtree_krrh(node *t1, node *t2) {
-	const string str = tree2string(t2); // smaller tree
-	const long long hash = get_string_hash(str);
-	krrh hash_obj(str.size());
-	return perform_is_subtree_krrh(t1, hash, str, hash_obj);
+bool perform_is_subtree_krrh_inorder(node *tree, long long hash, const string &str, krrh &hash_obj) {
+	if(!tree) return false;
+	if(perform_is_subtree_krrh_inorder(tree->left, hash, str, hash_obj)) return true;
+
+	hash_obj.append(tree->value);
+
+	if(hash_obj.full())
+		if(hash_obj.get_hash() == hash)
+			if(hash_obj.get_str() == str)
+				return true;
+	if(perform_is_subtree_krrh_inorder(tree->right, hash, str, hash_obj)) return true;
+	return false;
 }
 
+bool is_subtree_krrh_preorder(node *t1, node *t2) {
+	const string str= tree2string_preorder(t2); // smaller tree
+	const long long hash= get_string_hash(str);
+	krrh hash_obj(str.size());
+	return perform_is_subtree_krrh_preorder(t1, hash, str, hash_obj);
+}
+bool is_subtree_krrh_inorder(node *t1, node *t2) {
+	const string str= tree2string_inorder(t2); // smaller tree
+	const long long hash= get_string_hash(str);
+	krrh hash_obj(str.size());
+	return perform_is_subtree_krrh_inorder(t1, hash, str, hash_obj);
+}
+
+bool is_subtree_krrh(node *t1, node *t2) {
+	return is_subtree_krrh_preorder(t1, t2) && is_subtree_krrh_inorder(t1, t2);
+}
 /////////////////////////////////////////////////////////////////////////////﻿
 
 node *gen_tree(node *root, int depth) {
@@ -319,6 +382,7 @@ int main(void) {
 		//print_tree(gc[9]);
 
 		if(!is_subtree_dfs(tree, gc[9])) cout << "PROBLEM!" << endl;
+		if(!is_subtree_dfs_book(tree, gc[9])) cout << "PROBLEM!" << endl;
 		if(!is_subtree_strings(tree, gc[9])) cout << "PROBLEM!" << endl;
 		if(!is_subtree_krrh(tree, gc[9])) cout << "PROBLEM!" << endl;
 		release_gc();
@@ -331,6 +395,7 @@ int main(void) {
 		//print_tree(tree);
 		//print_tree(gc[5]);
 
+		if(!is_subtree_dfs_book(tree, gc[5])) cout << "PROBLEM!" << endl;
 		if(!is_subtree_dfs(tree, gc[5])) cout << "PROBLEM!" << endl;
 		if(!is_subtree_strings(tree, gc[5])) cout << "PROBLEM!" << endl;
 		if(!is_subtree_krrh(tree, gc[5])) cout << "PROBLEM!" << endl;
@@ -344,6 +409,7 @@ int main(void) {
 		//print_tree(tree);
 		//print_tree(gc[6]);
 
+		if(!is_subtree_dfs_book(tree, gc[6])) cout << "PROBLEM!" << endl;
 		if(!is_subtree_dfs(tree, gc[6])) cout << "PROBLEM!" << endl;
 		if(!is_subtree_strings(tree, gc[6])) cout << "PROBLEM!" << endl;
 		if(!is_subtree_krrh(tree, gc[6])) cout << "PROBLEM!" << endl;
@@ -400,7 +466,7 @@ int main(void) {
 
 		//print_tree(T);
 
-		if(!is_subtree_dfs(tree, T)) cout << "PROBLEM!++++" << endl;
+		//if(!is_subtree_dfs(tree, T)) cout << "PROBLEM!" << endl;
 		if(!is_subtree_strings(tree, T)) cout << "PROBLEM!" << endl;
 		if(!is_subtree_krrh(tree, T)) cout << "PROBLEM!" << endl;
 		release_gc();
@@ -430,6 +496,7 @@ int main(void) {
 
 		//print_tree(Y);
 
+		if(!is_subtree_dfs_book(tree, Y)) cout << "PROBLEM!" << endl;
 		if(!is_subtree_dfs(tree, Y)) cout << "PROBLEM!" << endl;
 		if(!is_subtree_strings(tree, Y)) cout << "PROBLEM!" << endl;
 		if(!is_subtree_krrh(tree, Y)) cout << "PROBLEM!" << endl;
@@ -440,6 +507,7 @@ int main(void) {
 	{ // Test 7 negative
 		node *tree = gen_tree(new node(), 3);
 
+		if(is_subtree_dfs_book(tree, new node())) cout << "PROBLEM!" << endl;
 		if(is_subtree_dfs(tree, new node())) cout << "PROBLEM!" << endl;
 		if(is_subtree_strings(tree, new node())) cout << "PROBLEM!" << endl;
 		if(is_subtree_krrh(tree, new node())) cout << "PROBLEM!" << endl;
@@ -471,6 +539,7 @@ int main(void) {
 
 		//print_tree(Y);
 
+		if(is_subtree_dfs_book(tree, Y)) cout << "PROBLEM!" << endl;
 		if(is_subtree_dfs(tree, Y)) cout << "PROBLEM!" << endl;
 		if(is_subtree_strings(tree, Y)) cout << "PROBLEM!" << endl;
 		if(is_subtree_krrh(tree, Y)) cout << "PROBLEM!" << endl;
@@ -493,6 +562,7 @@ int main(void) {
 
 		//print_tree(C);
 
+		if(is_subtree_dfs_book(tree, C)) cout << "PROBLEM!" << endl;
 		if(is_subtree_dfs(tree, C)) cout << "PROBLEM!" << endl;
 		if(is_subtree_strings(tree, C)) cout << "PROBLEM!" << endl;
 		if(is_subtree_krrh(tree, C)) cout << "PROBLEM!" << endl;
@@ -523,6 +593,7 @@ int main(void) {
 
 		//print_tree(S);
 
+		if(is_subtree_dfs_book(tree, S)) cout << "PROBLEM!" << endl;
 		if(is_subtree_dfs(tree, S)) cout << "PROBLEM!" << endl;
 		if(is_subtree_strings(tree, S)) cout << "PROBLEM!" << endl;
 		if(is_subtree_krrh(tree, S)) cout << "PROBLEM!" << endl;
@@ -553,6 +624,7 @@ int main(void) {
 
 		//print_tree(S);
 
+		if(!is_subtree_dfs_book(tree, S)) cout << "PROBLEM!" << endl;
 		if(!is_subtree_dfs(tree, S)) cout << "PROBLEM!" << endl;
 		if(!is_subtree_strings(tree, S)) cout << "PROBLEM!" << endl;
 		if(!is_subtree_krrh(tree, S)) cout << "PROBLEM!" << endl;
