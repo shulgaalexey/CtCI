@@ -11,7 +11,7 @@
 using namespace std;
 
 int insert(int N, int M, int i, int j) {
-	int mask = ((-1) << (i + j)) | (~((-1) << i)); // mask: 11110000011 to clear bits j through i
+	int mask = ((-1) << (i + j + 1)) | (~((-1) << i)); // mask: 11110000011 to clear bits j through i
 	N &= mask;
 	N |= M << i;
 	return N;
