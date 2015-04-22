@@ -1,0 +1,27 @@
+6.1 You have 20 bottles of pills. 19 bottles have 1.0 gram pills, but one has pills of weight 1.1 gram.
+Given a scale that provides an exact measurement, how would you find the heavy bottle?
+You can only use the scale once.
+
+Solution
+
+a) Draw a number on each bottle (from 1 to 20)
+b)
+  1. Take one pill from bottle1 and put it on the scale
+  2. Take two pills from bottle2 and put it on the scale
+  3. Take three pills from bottle3 and put it on the scale
+  ....
+  20. Take twenty pills from bottle20 and put it on the scale
+c) Check the total mass m.
+   In fact it is a sum 1*m1 + 2*m2 + 3*m3 + ... + 20*m20 where mi is a mass of pill from bottle i
+d) Suppose that each pill has mass 1.0 (without exceptions, such as 1.1 gram pills).
+   The summary mass would be
+      ((1 + 20) / 2) * 20 = 210
+e) Calculate the difference of real and supposed masses
+      dm = m - 210,   dm = [0.1 ... 2.0]
+f) The difference dm is caused by extra mass of pills from the bottle N:
+      dm = 0.1 gram * N
+g) Consolidating (e) and (f):
+ m - 210 = 0.1 * N
+   or
+      N = 10 * (m- 210)
+h) Finish
