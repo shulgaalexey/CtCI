@@ -1,0 +1,132 @@
+6.2 There  is an 8x8 chess board in which two diagonally opposite corners have
+been cut off. You are given 31 dominos, and a single domino can cover exactly two squares.
+Can you use the 31 dominos to cover the entire board? Prove your answer
+(by providing an example or showing why it's impossible).
+
+0) Pre-check: 31 dominos is enough to cover the given board
+
+
+The given chess board
+----------------------
+Some dominos are randomly placed for example
+
+1 2 3 4 5 6 7 8
+
+1  # - - - - - - -
+2  - - - < > - - -
+3  - - - - - - - -
+.  - ^ - - - - - -
+.  - V - - - - - -
+8  - - - - - - - #
+
+
+  # - cut off corner
+  <, ^ - one side of domino
+  > V - another side of domino
+  - - empty square
+
+  < > - the whole domino horizontally
+
+  ^
+  V - the whole domino vertically
+
+
+Approach 1.
+----------------
+
+1. Board NxN can be reduced to (N-2)xN by covering an edge starting from one cut off corner with two rows
+of dominos
+
+   1 2 3 4 5 6 7 8
+
+1  # < > < > < > ^
+2  ^ < > < > < > V
+3  V - - - - - - -
+.  - - - - - - - -
+.  - - - - - - - -
+8  - - - - - - - #
+
+2. Consequently, board NxN can be reduced to
+ - 2xN if N is even
+ - 1XN if N is odd (but this case is not interested,
+because the entire NxN board square will also be odd which can only be filled
+with fractional number of dominos, which is differ from the task statement)
+
+3. Assume that reduced board size is 2xN.
+It can be perfectly filled with dominos only if N is odd, because cut off corners reducing the length
+of each row to (N-1) and (N-1) must be even.
+
+Good example, can cover the board 5x2
+ # < > < >
+ < > < > #
+Bad example, can not cover the board 6x2
+ # < > < > -  - < > < > #
+
+Assumption that N is odd is not matching section (2),
+  so the given board 8x8 can not be covered with dominos entirely.
+
+4*. In addition to aforementioned we can see that only boards Nx(N+1) can
+be covered entirely with proper amount of dominos
+
+Approach 2.
+--------------
+1. The minimal board with two opposinte corners cut off has size 2x3 or 3x2 (doesn't matter)
+
+  # ^
+  ^ V
+  V #
+
+  or
+
+ # < >
+ < > #
+
+2. If the given board NxN can be reduced to
+ - 2x3 - it is coverable
+ - 2x2 it is not coverable
+
+3. Covering 8x8 board by alg A is reducing it to 2x2 board, so it is not coverable
+
+4*. Note that 8x9 board can be covered
+
+Algorithm A
+~~~~~~~~~~~
+1. Covering outer border of NxN board;
+getting uncovered board (N-2)x(N-2)
+2. Repeating until border size is 2x3 or 2x2
+3. Finish
+
+Example:
+Step 1.
+Reducing board 8x8
+
+   1 2 3 4 5 6 7 8
+
+1  # < > < > < > ^
+2  < > - - - - - V
+3  ^ - - - - - - ^
+4  V - - - - - - V
+5  ^ - - - - - - ^
+6  V - - - - - - V
+7  ^ - - - - - < >
+8  V < > < > < > #
+
+Obtainint reduced board 6x6
+
+   1 2 3 4 5 6 7 8
+
+1  # # # # # # # #
+2  # # - - - - - #
+3  # - - - - - - #
+4  # - - - - - - #
+5  # - - - - - - #
+6  # - - - - - - #
+7  # - - - - - # #
+8  # # # # # # # #
+
+
+Books Solution
+---------------
+If two corners are cut off then the amount of black squares is different with amount of white ones.
+But if we have 31 dominos we can only cover similar amount of black and white squares.
+Therefore it is impossible to cover the board with 31 dominos.
