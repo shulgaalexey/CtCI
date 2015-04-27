@@ -1,0 +1,18 @@
+6.5 There is a building of 100 floors. If an egg drops from the Nth floor or above, it will break.
+If it/s dropped from any floor below, it will not break. You are given two eggs.
+Find N, while minimizing the number of drops for the worst case.
+
+
+Assume that we are dropping the first egg from fl M
+If the egg isn't break, we are going M fls upper.
+Else we are going M fl lower and continuously dropping the second egg on each fl
+Finally we can find the N'th fl where the second egg is break.
+
+
+Formula for the worst case (N = 99)
+
+Drops = N / M + (M - 1)
+
+
+The min of function y = 100 / x + x -1 is y(10) = 19
+So the amount of drops in the worst case is 19.

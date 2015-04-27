@@ -1,0 +1,24 @@
+6.4 A bunch of people are living on an island, when a visitor comes with a strange order:
+all blue-eyed people must leave the island as soon as possible. There will be a flight
+out at 8:00 pm every evening. Each person can see eeryone else's eye color, but they do no know
+their own (nor is anyone allowed to tell them). Additionally, they do not know how many
+people have blue eyes, although they do know that at least one person does. How many days
+will it take the blue-eyed people to leave?
+
+
+Solution for ~ (log(blue_eyed_amount) + 2) days
+------------------------------------------------
+1. Every day people randomly stand in two rows of same length
+2. If someone from the first row sees a blue-eyed in the opposite row, he is going home,
+and the blue-eyed understands everithyng ang goes to the airport
+3. Repeat untli noone will go home
+4. Finish in about (log(blu_eyed_amount) + 2) days
+
+
+Solution for one day
+--------------------
+1. People randomly stand in two rows of same length
+2. If someone sees a blue-eyed in the opposite row, he goes home
+  a. The blue-eyed understands everithing and goes to the airport
+  b. If both go home, they understand everithing ang go to the airport together
+3. Finish: all blu-eyed went to the airport

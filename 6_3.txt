@@ -1,0 +1,13 @@
+6.3 You have a five-quart jug, a three-quart jug, and an unlimited supply of water (but no measuring cups).
+How would you come up with exactly four quarts of water?
+Note that the jugs are oodly formed, such that filling up exactly "half" of the jug would be impossible.
+
+1. Fill 3q-jug with water
+2. Pour water from 3q-jug to 5q-jug
+3. Fill 3q-jug with water
+4. Pour water from 3q-jug to 5q-jug; only 2q will fit, so 1 q will remain in 3q-jug
+5. Empty 5q-jug
+6. Pour 1q of water from 3q-jug to 5q-jug
+7. Fill 3q-jug with water
+8. Pour water from 3q-jug to 5q-jug
+9. Finish
