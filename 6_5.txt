@@ -16,3 +16,7 @@ Drops = N / M + (M - 1)
 
 The min of function y = 100 / x + x -1 is y(10) = 19
 So the amount of drops in the worst case is 19.
+
+------------------------------------
+Correct answer is 14
+The idea is to balance drops of egg 1 and egg2
