@@ -17,32 +17,36 @@
 
  Lets hoops names are A, B and C
 
- p2* = p(A or B) and not p(C)
+ p2* = p(hit A, B, C)
+	+ p(hit A, B and miss C)
+	+ p(hit A, C and miss  B)
+	+ p(hit B, C and miss  A)
 
- p(A or B) = p + p - p * p = 2p - p^2
- p(C) = p
- not p(C) = 1 - p
+p(hit hoop) = p
+p(miss hoop) = 1 - p
 
- p2* = (2p - p^2)(1 - p)
- p2* = p(2 - p)(1 - p)
+so
 
- p2* = p(p - 1)(p - 2)
+p2* = p * p * p + 3 * p * p * (1 - p)
+p2* = p^3 + 3p^2 * (1 - p)
+p2* = 3p^2 - 2p^3
 
 
  2. Choosing a game:
 
  Choose Game 1 if p1* > p2*
- p > p(p - 1)(p - 2)
- p1 < (3 - sqrt(5)) / 2
- or
- p2 > (3 + sqrt(5)) / 2
+ p > 3p^2 - 2p^3
+ p < 0.5
+
 
  Choose Game 2 if p1* < p2*
- p > p(p - 1)(p - 2)
- (3 - sqrt(5)) / 2 <   p   < (3 + sqrt(5)) / 2
+ p < 3p^2 - 2p^3
+ p > 0.5
 
  Choose Game 1 or Game 2 if p1* = p2*
  p = p(p - 1)(p - 2)
- p1 = (3 - sqrt(5)) / 2
+ p1 = 0
  or
- p2 = (3 + sqrt(5)) / 2
+ p2 = 0.5
+ or
+ p3 = 1
