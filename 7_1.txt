@@ -1,0 +1,48 @@
+ 7.1 You have a basketball hoop and someone says that you can play one of two games.
+ Game 1: You get one shot to make the hoop.
+ Game 2: You get three shots and you have to make two of three shots.
+ If p is the probability of making a particular shot, for which value of p should
+ you pick one game or the other?
+
+ Solution
+
+ 1. Let probability of winning the game is p*
+
+ Game 1: 1 shot,  1 hoop
+ p1* = p
+
+
+
+ Game 2: 3 shots, 2 of 3 hoops
+
+ Lets hoops names are A, B and C
+
+ p2* = p(A or B) and not p(C)
+
+ p(A or B) = p + p - p * p = 2p - p^2
+ p(C) = p
+ not p(C) = 1 - p
+
+ p2* = (2p - p^2)(1 - p)
+ p2* = p(2 - p)(1 - p)
+
+ p2* = p(p - 1)(p - 2)
+
+
+ 2. Choosing a game:
+
+ Choose Game 1 if p1* > p2*
+ p > p(p - 1)(p - 2)
+ p1 < (3 - sqrt(5)) / 2
+ or
+ p2 > (3 + sqrt(5)) / 2
+
+ Choose Game 2 if p1* < p2*
+ p > p(p - 1)(p - 2)
+ (3 - sqrt(5)) / 2 <   p   < (3 + sqrt(5)) / 2
+
+ Choose Game 1 or Game 2 if p1* = p2*
+ p = p(p - 1)(p - 2)
+ p1 = (3 - sqrt(5)) / 2
+ or
+ p2 = (3 + sqrt(5)) / 2
