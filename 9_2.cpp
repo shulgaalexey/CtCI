@@ -49,6 +49,15 @@ int count_paths(int X, int Y) {
 	return _m[_key(pt)];
 }
 
+/* The solution is to start at (0,0) and use BFS to find the way to (X,Y);
+ *  - all disallowed cells are skipped
+ *  - using DP all duplicating visits are skipped
+ *  - the complexity is estimated as about O(XY)
+ * The book proposes the opposit way with the same complexity:
+ *  - starting from (X,Y) we consider (X-1,Y) and (X, Y-1)
+ *  - repeating recursively
+ *  - avoiding duplicated visits with help of DP
+ */
 vector<point> find_path(const vector<vector<bool> > &bariers) {
 	const int X = int(bariers[0].size() - 1);
 	const int Y = int(bariers.size() - 1);
