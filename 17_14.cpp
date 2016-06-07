@@ -22,6 +22,7 @@ void find_word(string &s, string &known, string &unknown) {
 
 	for(int p1 = 0; p1 < int(s.length()); p1 ++) {
 		word_begin = p1;
+		// TODO: instead of scanning untill the end of line we can scan through [p1, p1+max_word_len]
 		for(int p2 = p1; p2 < int(s.length()); p2 ++) {
 			string candidate = s.substr(p1, p2 - p1 + 1);
 			if(D.count(candidate) > 0) {
