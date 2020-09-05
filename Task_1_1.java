@@ -24,8 +24,25 @@ public class Task_1_1 {
 		return true;
 	}
 
+	static boolean uniqCharsNoDataStructure(final String str) {
+		if (str == null || str.isEmpty()) {
+			return false;
+		}
+
+		for (int i = 0; i < str.length(); i++) {
+			for (int j = i + 1; j < str.length(); j++) {
+				if (str.charAt(i) == str.charAt(j)) {
+					return false;
+				}
+			}
+		}
+		return true;
+
+	}
+
 
 	public static void main(String args[]) {
+		System.out.println("With array");
 		System.out.println(uniqChars(null) == false);
 		System.out.println(uniqChars("") == false);
 		System.out.println(uniqChars("a") == true);
@@ -33,6 +50,16 @@ public class Task_1_1 {
 		System.out.println(uniqChars("ab") == true);
 		System.out.println(uniqChars("aba") == false);
 		System.out.println(uniqChars("abyz") == true);
+
+		System.out.println("No additional data structure");
+		System.out.println(uniqCharsNoDataStructure(null) == false);
+		System.out.println(uniqCharsNoDataStructure("") == false);
+		System.out.println(uniqCharsNoDataStructure("a") == true);
+		System.out.println(uniqCharsNoDataStructure("aa") == false);
+		System.out.println(uniqCharsNoDataStructure("ab") == true);
+		System.out.println(uniqCharsNoDataStructure("aba") == false);
+		System.out.println(uniqCharsNoDataStructure("abyz") == true);
+
 		System.out.println("done");
 	}
 
