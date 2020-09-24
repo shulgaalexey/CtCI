@@ -1,0 +1,49 @@
+// Different graph traversal approaches
+import java.util.*;
+
+public class GraphTraverse {
+
+	static class MyNode {
+		T data;
+		boolean visited;
+		List<MyNode> children = new ArrayList<>();
+		MyNode(T data) {
+			this.data = data;
+		}
+		void addChild(MyNode node) {
+			children.add(node);
+		}
+	}
+
+
+	static void bfs(MyNode graph) {
+		Queue<MyNode> q = new LinkedList<>();
+		q.offer(graph);
+		while (!q.isEmpty()) {
+			MyGraph node = q.poll();
+			node.visited = true;
+			System.out.println(node.data);
+			for (MyNode child: node.children) {
+				if (!child.visited) {
+					q.offer(child);
+				}
+			}
+		}
+	}
+
+	/*
+	 *      a-----
+	 *     / \    \
+	 *    b   c    d
+	 *    |   |   / \
+	 *    e   f  g  h
+	 *
+	 *
+	 *
+	 *
+	 *
+	 */
+	public static void main(String args[]) {
+		MyNode g = new MyNode('a');
+	}
+}
