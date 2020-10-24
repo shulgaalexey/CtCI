@@ -35,8 +35,6 @@ public class Task_2_6 {
 
 	static boolean isPalindrome(MyList l) {
 		MyList revert = revert(l);
-		print(l);
-		print(revert);
 
 		while(l != null) {
 			if (l.data != revert.data) {
