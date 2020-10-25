@@ -71,7 +71,6 @@ public class Task_4_8 {
 
 		System.out.println(findCommonAncestor(n4, n8, n1).data == 2);
 		System.out.println(findCommonAncestor(n2, n8, n1).data == 2);
-		System.out.println(findCommonAncestor(n5, n3, n1).data == 1);
-		System.out.println(findCommonAncestor(n2, n3, n1).data);
+		System.out.println(findCommonAncestor(n5, n6, n1).data == 1);
 	}
 }
