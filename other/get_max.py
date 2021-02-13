@@ -4,7 +4,7 @@
 
 # If a < b return 0, otherwise 1
 def suppress_min(a, b):
-    z = a / b
+    z = int(a / b)
     d = 1 - 1 % (z + 1)
     return d
 
